@@ -1,3 +1,4 @@
+"""This module contains the Level component."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -9,6 +10,8 @@ if TYPE_CHECKING:
 
 
 class Level(BaseComponent):
+    """An entity component that handles leveling up."""
+
     parent: Actor
 
     def __init__(
@@ -19,6 +22,7 @@ class Level(BaseComponent):
         level_up_factor: int = 150,
         xp_given: int = 0,
     ):
+        """Initializes the level component."""
         self.current_level = current_level
         self.current_xp = current_xp
         self.level_up_base = level_up_base
@@ -27,13 +31,16 @@ class Level(BaseComponent):
 
     @property
     def experience_to_next_level(self) -> int:
+        """Return the amount of experience needed to level up."""
         return self.level_up_base + self.current_level * self.level_up_factor
 
     @property
     def requires_level_up(self) -> bool:
+        """Return True if the entity has enough experience to level up."""
         return self.current_xp > self.experience_to_next_level
 
     def add_xp(self, xp: int) -> None:
+        """Add experience points to the entity."""
         if xp == 0 or self.level_up_base == 0:
             return
 
@@ -47,11 +54,13 @@ class Level(BaseComponent):
             )
 
     def increase_level(self) -> None:
+        """Increase the entity's level."""
         self.current_xp -= self.experience_to_next_level
 
         self.current_level += 1
 
     def increase_max_hp(self, amount: int = 20) -> None:
+        """Increase the entity's max HP."""
         self.parent.fighter.max_hp += amount
         self.parent.fighter.hp += amount
 
@@ -60,6 +69,7 @@ class Level(BaseComponent):
         self.increase_level()
 
     def increase_power(self, amount: int = 1) -> None:
+        """Increase the entity's power."""
         self.parent.fighter.base_power += amount
 
         self.engine.message_log.add_message("You feel stronger!")
@@ -67,6 +77,7 @@ class Level(BaseComponent):
         self.increase_level()
 
     def increase_defense(self, amount: int = 1) -> None:
+        """Increase the entity's defense."""
         self.parent.fighter.base_defense += amount
 
         self.engine.message_log.add_message("Your movements are getting swifter!")

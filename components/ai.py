@@ -1,3 +1,4 @@
+"""This module contains the AI classes for the game's actors."""
 from __future__ import annotations
 
 import random
@@ -13,7 +14,10 @@ if TYPE_CHECKING:
 
 
 class BaseAI(Action):
+    """The base class for all AI."""
+
     def perform(self) -> None:
+        """Perform this AI's action."""
         raise NotImplementedError()
 
     def get_path_to(self, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
@@ -47,11 +51,15 @@ class BaseAI(Action):
 
 
 class HostileEnemy(BaseAI):
+    """An AI that will track and attack the player."""
+
     def __init__(self, entity: Actor):
+        """Initializes the HostileEnemy AI."""
         super().__init__(entity)
         self.path: List[Tuple[int, int]] = []
 
     def perform(self) -> None:
+        """Perform this AI's action."""
         target = self.engine.player
         dx = target.x - self.entity.x
         dy = target.y - self.entity.y
@@ -59,34 +67,42 @@ class HostileEnemy(BaseAI):
 
         if self.engine.game_map.visible[self.entity.x, self.entity.y]:
             if distance <= 1:
+                # If the player is adjacent, attack them.
                 return MeleeAction(self.entity, dx, dy).perform()
 
+            # If the player is in sight, calculate a path to them.
             self.path = self.get_path_to(target.x, target.y)
 
         if self.path:
+            # If there is a path, move along it.
             dest_x, dest_y = self.path.pop(0)
             return MovementAction(
                 self.entity, dest_x - self.entity.x, dest_y - self.entity.y,
             ).perform()
 
+        # If there is no path, wait.
         return WaitAction(self.entity).perform()
 
 
 class ConfusedEnemy(BaseAI):
-    """
-    A confused enemy will stumble around aimlessly for a given number of turns, then revert back to its previous AI.
-    If an actor occupies a tile it is randomly moving into, it will attack.
+    """An AI for a confused enemy.
+
+    A confused enemy will stumble around aimlessly for a given number of turns,
+    then revert back to its previous AI. If an actor occupies a tile it is
+    randomly moving into, it will attack.
     """
 
     def __init__(
         self, entity: Actor, previous_ai: Optional[BaseAI], turns_remaining: int
     ):
+        """Initializes the ConfusedEnemy AI."""
         super().__init__(entity)
 
         self.previous_ai = previous_ai
         self.turns_remaining = turns_remaining
 
     def perform(self) -> None:
+        """Perform this AI's action."""
         # Revert the AI back to the original state if the effect has run its course.
         if self.turns_remaining <= 0:
             self.engine.message_log.add_message(

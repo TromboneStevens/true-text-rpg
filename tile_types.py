@@ -1,3 +1,4 @@
+"""This module contains the tile types for the game."""
 from typing import Tuple
 
 import numpy as np  # type: ignore

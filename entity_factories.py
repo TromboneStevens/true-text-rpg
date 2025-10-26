@@ -1,3 +1,4 @@
+"""This module contains the factories for creating entities."""
 from components.ai import HostileEnemy
 from components import consumable, equippable
 from components.equipment import Equipment

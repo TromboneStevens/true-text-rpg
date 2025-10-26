@@ -1,3 +1,4 @@
+"""This module contains all the actions that can be performed by entities."""
 from __future__ import annotations
 
 from typing import Optional, Tuple, TYPE_CHECKING
@@ -11,7 +12,10 @@ if TYPE_CHECKING:
 
 
 class Action:
+    """A generic action that can be performed by an entity."""
+
     def __init__(self, entity: Actor) -> None:
+        """Initializes the action."""
         super().__init__()
         self.entity = entity
 
@@ -36,9 +40,11 @@ class PickupAction(Action):
     """Pickup an item and add it to the inventory, if there is room for it."""
 
     def __init__(self, entity: Actor):
+        """Initializes the pickup action."""
         super().__init__(entity)
 
     def perform(self) -> None:
+        """Perform the pickup action."""
         actor_location_x = self.entity.x
         actor_location_y = self.entity.y
         inventory = self.entity.inventory
@@ -59,9 +65,12 @@ class PickupAction(Action):
 
 
 class ItemAction(Action):
+    """An action that involves an item."""
+
     def __init__(
         self, entity: Actor, item: Item, target_xy: Optional[Tuple[int, int]] = None
     ):
+        """Initializes the item action."""
         super().__init__(entity)
         self.item = item
         if not target_xy:
@@ -80,7 +89,10 @@ class ItemAction(Action):
 
 
 class DropItem(ItemAction):
+    """An action that drops an item from the inventory."""
+
     def perform(self) -> None:
+        """Perform the drop item action."""
         if self.entity.equipment.item_is_equipped(self.item):
             self.entity.equipment.toggle_equip(self.item)
 
@@ -88,25 +100,32 @@ class DropItem(ItemAction):
 
 
 class EquipAction(Action):
+    """An action that equips an item."""
+
     def __init__(self, entity: Actor, item: Item):
+        """Initializes the equip action."""
         super().__init__(entity)
 
         self.item = item
 
     def perform(self) -> None:
+        """Perform the equip action."""
         self.entity.equipment.toggle_equip(self.item)
 
 
 class WaitAction(Action):
+    """An action that does nothing."""
+
     def perform(self) -> None:
+        """Perform the wait action."""
         pass
 
 
 class TakeStairsAction(Action):
+    """An action that takes the stairs to the next floor."""
+
     def perform(self) -> None:
-        """
-        Take the stairs, if any exist at the entity's location.
-        """
+        """Perform the take stairs action."""
         if (self.entity.x, self.entity.y) == self.engine.game_map.downstairs_location:
             self.engine.game_world.generate_floor()
             self.engine.message_log.add_message(
@@ -117,7 +136,10 @@ class TakeStairsAction(Action):
 
 
 class ActionWithDirection(Action):
+    """An action that has a direction."""
+
     def __init__(self, entity: Actor, dx: int, dy: int):
+        """Initializes the action with direction."""
         super().__init__(entity)
 
         self.dx = dx
@@ -139,11 +161,15 @@ class ActionWithDirection(Action):
         return self.engine.game_map.get_actor_at_location(*self.dest_xy)
 
     def perform(self) -> None:
+        """Perform the action."""
         raise NotImplementedError()
 
 
 class MeleeAction(ActionWithDirection):
+    """An action that performs a melee attack."""
+
     def perform(self) -> None:
+        """Perform the melee action."""
         target = self.target_actor
         if not target:
             raise exceptions.Impossible("Nothing to attack.")
@@ -168,7 +194,10 @@ class MeleeAction(ActionWithDirection):
 
 
 class MovementAction(ActionWithDirection):
+    """An action that moves the entity."""
+
     def perform(self) -> None:
+        """Perform the movement action."""
         dest_x, dest_y = self.dest_xy
 
         if not self.engine.game_map.in_bounds(dest_x, dest_y):
@@ -185,7 +214,10 @@ class MovementAction(ActionWithDirection):
 
 
 class BumpAction(ActionWithDirection):
+    """An action that either moves or attacks."""
+
     def perform(self) -> None:
+        """Perform the bump action."""
         if self.target_actor:
             return MeleeAction(self.entity, self.dx, self.dy).perform()
 

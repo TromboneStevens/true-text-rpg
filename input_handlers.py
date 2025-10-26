@@ -1,3 +1,4 @@
+"""This module contains the input handlers for the game."""
 from __future__ import annotations
 
 import os
@@ -72,6 +73,8 @@ MainGameEventHandler will become the active handler.
 
 
 class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
+    """A base class for all event handlers."""
+
     def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
         """Handle an event and return the next active event handler."""
         state = self.dispatch(event)
@@ -81,9 +84,11 @@ class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
         return self
 
     def on_render(self, console: tcod.Console) -> None:
+        """Called when the screen is rendered."""
         raise NotImplementedError()
 
     def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
+        """Called when the user closes the window."""
         raise SystemExit()
 
 
@@ -91,6 +96,7 @@ class PopupMessage(BaseEventHandler):
     """Display a popup text window."""
 
     def __init__(self, parent_handler: BaseEventHandler, text: str):
+        """Initializes the popup message."""
         self.parent = parent_handler
         self.text = text
 
@@ -115,7 +121,10 @@ class PopupMessage(BaseEventHandler):
 
 
 class EventHandler(BaseEventHandler):
+    """A base class for event handlers that have an engine."""
+
     def __init__(self, engine: Engine):
+        """Initializes the event handler."""
         self.engine = engine
 
     def handle_events(self, event: tcod.event.Event) -> BaseEventHandler:
@@ -153,10 +162,12 @@ class EventHandler(BaseEventHandler):
         return True
 
     def ev_mousemotion(self, event: tcod.event.MouseMotion) -> None:
+        """Called when the mouse is moved."""
         if self.engine.game_map.in_bounds(event.tile.x, event.tile.y):
             self.engine.mouse_location = event.tile.x, event.tile.y
 
     def on_render(self, console: tcod.Console) -> None:
+        """Called when the screen is rendered."""
         self.engine.render(console)
 
 
@@ -191,9 +202,12 @@ class AskUserEventHandler(EventHandler):
 
 
 class CharacterScreenEventHandler(AskUserEventHandler):
+    """Handles the character screen."""
+
     TITLE = "Character Information"
 
     def on_render(self, console: tcod.Console) -> None:
+        """Called when the screen is rendered."""
         super().on_render(console)
 
         if self.engine.player.x <= 30:
@@ -237,9 +251,12 @@ class CharacterScreenEventHandler(AskUserEventHandler):
 
 
 class LevelUpEventHandler(AskUserEventHandler):
+    """Handles the level up screen."""
+
     TITLE = "Level Up"
 
     def on_render(self, console: tcod.Console) -> None:
+        """Called when the screen is rendered."""
         super().on_render(console)
 
         if self.engine.player.x <= 30:
@@ -278,6 +295,7 @@ class LevelUpEventHandler(AskUserEventHandler):
         )
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+        """Called when a key is pressed."""
         player = self.engine.player
         key = event.sym
         index = key - tcod.event.K_a
@@ -362,6 +380,7 @@ class InventoryEventHandler(AskUserEventHandler):
             console.print(x + 1, y + 1, "(Empty)")
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+        """Called when a key is pressed."""
         player = self.engine.player
         key = event.sym
         index = key - tcod.event.K_a
@@ -386,6 +405,7 @@ class InventoryActivateHandler(InventoryEventHandler):
     TITLE = "Select an item to use"
 
     def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
+        """Called when the user selects a valid item."""
         if item.consumable:
             # Return the action for the selected item.
             return item.consumable.get_action(self.engine.player)
@@ -474,11 +494,13 @@ class SingleRangedAttackHandler(SelectIndexHandler):
     def __init__(
         self, engine: Engine, callback: Callable[[Tuple[int, int]], Optional[Action]]
     ):
+        """Initializes the single ranged attack handler."""
         super().__init__(engine)
 
         self.callback = callback
 
     def on_index_selected(self, x: int, y: int) -> Optional[Action]:
+        """Called when an index is selected."""
         return self.callback((x, y))
 
 
@@ -491,6 +513,7 @@ class AreaRangedAttackHandler(SelectIndexHandler):
         radius: int,
         callback: Callable[[Tuple[int, int]], Optional[Action]],
     ):
+        """Initializes the area ranged attack handler."""
         super().__init__(engine)
 
         self.radius = radius
@@ -513,11 +536,15 @@ class AreaRangedAttackHandler(SelectIndexHandler):
         )
 
     def on_index_selected(self, x: int, y: int) -> Optional[Action]:
+        """Called when an index is selected."""
         return self.callback((x, y))
 
 
 class MainGameEventHandler(EventHandler):
+    """Handles the main game loop."""
+
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
+        """Called when a key is pressed."""
         action: Optional[Action] = None
 
         key = event.sym
@@ -558,6 +585,8 @@ class MainGameEventHandler(EventHandler):
 
 
 class GameOverEventHandler(EventHandler):
+    """Handles the game over screen."""
+
     def on_quit(self) -> None:
         """Handle exiting out of a finished game."""
         if os.path.exists("savegame.sav"):
@@ -565,9 +594,11 @@ class GameOverEventHandler(EventHandler):
         raise exceptions.QuitWithoutSaving()  # Avoid saving a finished game.
 
     def ev_quit(self, event: tcod.event.Quit) -> None:
+        """Called when the user closes the window."""
         self.on_quit()
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> None:
+        """Called when a key is pressed."""
         if event.sym == tcod.event.K_ESCAPE:
             self.on_quit()
 
@@ -584,11 +615,13 @@ class HistoryViewer(EventHandler):
     """Print the history on a larger window which can be navigated."""
 
     def __init__(self, engine: Engine):
+        """Initializes the history viewer."""
         super().__init__(engine)
         self.log_length = len(engine.message_log.messages)
         self.cursor = self.log_length - 1
 
     def on_render(self, console: tcod.Console) -> None:
+        """Called when the screen is rendered."""
         super().on_render(console)  # Draw the main state as the background.
 
         log_console = tcod.Console(console.width - 6, console.height - 6)
@@ -611,6 +644,7 @@ class HistoryViewer(EventHandler):
         log_console.blit(console, 3, 3)
 
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[MainGameEventHandler]:
+        """Called when a key is pressed."""
         # Fancy conditional movement to make it feel right.
         if event.sym in CURSOR_Y_KEYS:
             adjust = CURSOR_Y_KEYS[event.sym]

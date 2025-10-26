@@ -1,3 +1,4 @@
+"""This module contains the Inventory component."""
 from __future__ import annotations
 
 from typing import List, TYPE_CHECKING
@@ -9,16 +10,17 @@ if TYPE_CHECKING:
 
 
 class Inventory(BaseComponent):
+    """An entity component that handles an inventory of items."""
+
     parent: Actor
 
     def __init__(self, capacity: int):
+        """Initializes the inventory."""
         self.capacity = capacity
         self.items: List[Item] = []
 
     def drop(self, item: Item) -> None:
-        """
-        Removes an item from the inventory and restores it to the game map, at the player's current location.
-        """
+        """Remove an item from the inventory and drop it on the ground."""
         self.items.remove(item)
         item.place(self.parent.x, self.parent.y, self.gamemap)
 

@@ -1,3 +1,4 @@
+"""This module contains the procedural generation for the game."""
 from __future__ import annotations
 
 import random
@@ -44,6 +45,7 @@ enemy_chances: Dict[int, List[Tuple[Entity, int]]] = {
 def get_max_value_for_floor(
     max_value_by_floor: List[Tuple[int, int]], floor: int
 ) -> int:
+    """Return the maximum value for a given floor."""
     current_value = 0
 
     for floor_minimum, value in max_value_by_floor:
@@ -60,6 +62,7 @@ def get_entities_at_random(
     number_of_entities: int,
     floor: int,
 ) -> List[Entity]:
+    """Return a list of random entities."""
     entity_weighted_chances = {}
 
     for key, values in weighted_chances_by_floor.items():
@@ -83,7 +86,10 @@ def get_entities_at_random(
 
 
 class RectangularRoom:
+    """A rectangular room on the map."""
+
     def __init__(self, x: int, y: int, width: int, height: int):
+        """Initializes the rectangular room."""
         self.x1 = x
         self.y1 = y
         self.x2 = x + width
@@ -91,6 +97,7 @@ class RectangularRoom:
 
     @property
     def center(self) -> Tuple[int, int]:
+        """Return the center of the room."""
         center_x = int((self.x1 + self.x2) / 2)
         center_y = int((self.y1 + self.y2) / 2)
 
@@ -112,6 +119,7 @@ class RectangularRoom:
 
 
 def place_entities(room: RectangularRoom, dungeon: GameMap, floor_number: int,) -> None:
+    """Place entities in a room."""
     number_of_monsters = random.randint(
         0, get_max_value_for_floor(max_monsters_by_floor, floor_number)
     )

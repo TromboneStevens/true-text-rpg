@@ -1,3 +1,4 @@
+"""This module contains the Message and MessageLog classes."""
 from typing import Iterable, List, Reversible, Tuple
 import textwrap
 
@@ -7,7 +8,10 @@ import color
 
 
 class Message:
+    """A single message in the message log."""
+
     def __init__(self, text: str, fg: Tuple[int, int, int]):
+        """Initializes the message."""
         self.plain_text = text
         self.fg = fg
         self.count = 1
@@ -21,7 +25,10 @@ class Message:
 
 
 class MessageLog:
+    """The message log."""
+
     def __init__(self) -> None:
+        """Initializes the message log."""
         self.messages: List[Message] = []
 
     def add_message(

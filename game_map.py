@@ -1,3 +1,4 @@
+"""This module contains the GameMap and GameWorld classes."""
 from __future__ import annotations
 
 from typing import Iterable, Iterator, Optional, TYPE_CHECKING
@@ -14,9 +15,12 @@ if TYPE_CHECKING:
 
 
 class GameMap:
+    """A class that holds the game map."""
+
     def __init__(
         self, engine: Engine, width: int, height: int, entities: Iterable[Entity] = ()
     ):
+        """Initializes the game map."""
         self.engine = engine
         self.width, self.height = width, height
         self.entities = set(entities)
@@ -33,6 +37,7 @@ class GameMap:
 
     @property
     def gamemap(self) -> GameMap:
+        """Return self."""
         return self
 
     @property
@@ -46,11 +51,13 @@ class GameMap:
 
     @property
     def items(self) -> Iterator[Item]:
+        """Iterate over this maps items."""
         yield from (entity for entity in self.entities if isinstance(entity, Item))
 
     def get_blocking_entity_at_location(
         self, location_x: int, location_y: int,
     ) -> Optional[Entity]:
+        """Return the blocking entity at a given location."""
         for entity in self.entities:
             if (
                 entity.blocks_movement
@@ -62,6 +69,7 @@ class GameMap:
         return None
 
     def get_actor_at_location(self, x: int, y: int) -> Optional[Actor]:
+        """Return the actor at a given location."""
         for actor in self.actors:
             if actor.x == x and actor.y == y:
                 return actor
@@ -91,6 +99,7 @@ class GameMap:
         )
 
         for entity in entities_sorted_for_rendering:
+            # Only print entities that are in the FOV
             if self.visible[entity.x, entity.y]:
                 console.print(
                     x=entity.x, y=entity.y, string=entity.char, fg=entity.color
@@ -113,6 +122,7 @@ class GameWorld:
         room_max_size: int,
         current_floor: int = 0
     ):
+        """Initializes the game world."""
         self.engine = engine
 
         self.map_width = map_width
@@ -126,6 +136,7 @@ class GameWorld:
         self.current_floor = current_floor
 
     def generate_floor(self) -> None:
+        """Generate a new floor."""
         from procgen import generate_dungeon
 
         self.current_floor += 1

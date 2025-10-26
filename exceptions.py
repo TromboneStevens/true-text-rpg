@@ -1,3 +1,6 @@
+"""This module contains the custom exceptions used in the game."""
+
+
 class Impossible(Exception):
     """Exception raised when an action is impossible to be performed.
 

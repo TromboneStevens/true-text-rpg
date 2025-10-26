@@ -1,3 +1,4 @@
+"""This module contains all the consumable items."""
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
@@ -19,6 +20,8 @@ if TYPE_CHECKING:
 
 
 class Consumable(BaseComponent):
+    """A base class for all consumable items."""
+
     parent: Item
 
     def get_action(self, consumer: Actor) -> Optional[ActionOrHandler]:
@@ -41,10 +44,14 @@ class Consumable(BaseComponent):
 
 
 class ConfusionConsumable(Consumable):
+    """A consumable that confuses an enemy."""
+
     def __init__(self, number_of_turns: int):
+        """Initializes the confusion consumable."""
         self.number_of_turns = number_of_turns
 
     def get_action(self, consumer: Actor) -> SingleRangedAttackHandler:
+        """Return a handler for selecting a target."""
         self.engine.message_log.add_message(
             "Select a target location.", color.needs_target
         )
@@ -54,6 +61,7 @@ class ConfusionConsumable(Consumable):
         )
 
     def activate(self, action: actions.ItemAction) -> None:
+        """Activate the confusion effect on the target."""
         consumer = action.entity
         target = action.target_actor
 
@@ -75,11 +83,15 @@ class ConfusionConsumable(Consumable):
 
 
 class FireballDamageConsumable(Consumable):
+    """A consumable that deals damage in a radius."""
+
     def __init__(self, damage: int, radius: int):
+        """Initializes the fireball consumable."""
         self.damage = damage
         self.radius = radius
 
     def get_action(self, consumer: Actor) -> AreaRangedAttackHandler:
+        """Return a handler for selecting a target area."""
         self.engine.message_log.add_message(
             "Select a target location.", color.needs_target
         )
@@ -90,6 +102,7 @@ class FireballDamageConsumable(Consumable):
         )
 
     def activate(self, action: actions.ItemAction) -> None:
+        """Activate the fireball, dealing damage to all actors in the radius."""
         target_xy = action.target_xy
 
         if not self.engine.game_map.visible[target_xy]:
@@ -110,10 +123,14 @@ class FireballDamageConsumable(Consumable):
 
 
 class HealingConsumable(Consumable):
+    """A consumable that heals the consumer."""
+
     def __init__(self, amount: int):
+        """Initializes the healing consumable."""
         self.amount = amount
 
     def activate(self, action: actions.ItemAction) -> None:
+        """Activate the healing effect."""
         consumer = action.entity
         amount_recovered = consumer.fighter.heal(self.amount)
 
@@ -128,11 +145,15 @@ class HealingConsumable(Consumable):
 
 
 class LightningDamageConsumable(Consumable):
+    """A consumable that strikes the closest enemy with lightning."""
+
     def __init__(self, damage: int, maximum_range: int):
+        """Initializes the lightning consumable."""
         self.damage = damage
         self.maximum_range = maximum_range
 
     def activate(self, action: actions.ItemAction) -> None:
+        """Activate the lightning strike."""
         consumer = action.entity
         target = None
         closest_distance = self.maximum_range + 1.0

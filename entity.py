@@ -1,3 +1,4 @@
+"""This module contains the base classes for all game objects."""
 from __future__ import annotations
 
 import copy
@@ -20,8 +21,12 @@ T = TypeVar("T", bound="Entity")
 
 
 class Entity:
-    """
-    A generic object to represent players, enemies, items, etc.
+    """A generic object to represent players, enemies, items, etc.
+
+    Attributes:
+        parent (Union[GameMap, Inventory]): The parent of this entity.
+            If it's on the map, the parent is the GameMap. If it's in an
+            inventory, the parent is the Inventory.
     """
 
     parent: Union[GameMap, Inventory]
@@ -37,6 +42,7 @@ class Entity:
         blocks_movement: bool = False,
         render_order: RenderOrder = RenderOrder.CORPSE,
     ):
+        """Initializes the entity."""
         self.x = x
         self.y = y
         self.char = char
@@ -51,6 +57,7 @@ class Entity:
 
     @property
     def gamemap(self) -> GameMap:
+        """Return the GameMap this entity is currently in."""
         return self.parent.gamemap
 
     def spawn(self: T, gamemap: GameMap, x: int, y: int) -> T:
@@ -63,7 +70,7 @@ class Entity:
         return clone
 
     def place(self, x: int, y: int, gamemap: Optional[GameMap] = None) -> None:
-        """Place this entitiy at a new location.  Handles moving across GameMaps."""
+        """Place this entity at a new location. Handles moving across GameMaps."""
         self.x = x
         self.y = y
         if gamemap:
@@ -74,18 +81,18 @@ class Entity:
             gamemap.entities.add(self)
 
     def distance(self, x: int, y: int) -> float:
-        """
-        Return the distance between the current entity and the given (x, y) coordinate.
-        """
+        """Return the distance between the current entity and the given (x, y) coordinate."""
         return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move(self, dx: int, dy: int) -> None:
-        # Move the entity by a given amount
+        """Move the entity by a given amount."""
         self.x += dx
         self.y += dy
 
 
 class Actor(Entity):
+    """An entity that can perform actions, such as the player or an enemy."""
+
     def __init__(
         self,
         *,
@@ -100,6 +107,7 @@ class Actor(Entity):
         inventory: Inventory,
         level: Level,
     ):
+        """Initializes the actor."""
         super().__init__(
             x=x,
             y=y,
@@ -131,6 +139,8 @@ class Actor(Entity):
 
 
 class Item(Entity):
+    """An entity that can be picked up and used, such as a potion or a scroll."""
+
     def __init__(
         self,
         *,
@@ -142,6 +152,7 @@ class Item(Entity):
         consumable: Optional[Consumable] = None,
         equippable: Optional[Equippable] = None,
     ):
+        """Initializes the item."""
         super().__init__(
             x=x,
             y=y,
@@ -153,11 +164,9 @@ class Item(Entity):
         )
 
         self.consumable = consumable
-
         if self.consumable:
             self.consumable.parent = self
 
         self.equippable = equippable
-
         if self.equippable:
             self.equippable.parent = self
