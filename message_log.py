@@ -2,6 +2,7 @@
 from typing import Iterable, List, Reversible, Tuple
 import textwrap
 
+from tcod.console import Console
 import tcod
 
 import color
@@ -47,7 +48,7 @@ class MessageLog:
             self.messages.append(Message(text, fg))
 
     def render(
-        self, console: tcod.Console, x: int, y: int, width: int, height: int,
+        self, console: Console, x: int, y: int, width: int, height: int,
     ) -> None:
         """Render this log over the given area.
 
@@ -67,7 +68,7 @@ class MessageLog:
     @classmethod
     def render_messages(
         cls,
-        console: tcod.Console,
+        console: Console,
         x: int,
         y: int,
         width: int,

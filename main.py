@@ -3,6 +3,7 @@
 import traceback
 
 import tcod
+from tcod.console import Console
 
 import color
 import exceptions
@@ -45,15 +46,15 @@ def main() -> None:
     handler: input_handlers.BaseEventHandler = setup_game.MainMenu()
 
     # Create the main game window.
-    with tcod.context.new_terminal(
-        screen_width,
-        screen_height,
+    with tcod.context.new(
+        columns=screen_width,
+        rows=screen_height,
         tileset=tileset,
         title="True Text RPG",
         vsync=True,
     ) as context:
         # The root console is the main surface where the game is rendered.
-        root_console = tcod.Console(screen_width, screen_height, order="F")
+        root_console = Console(screen_width, screen_height, order="F")
         try:
             # This is the main game loop. It will run until the game is exited.
             while True:

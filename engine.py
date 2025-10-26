@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import lzma
 import pickle
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Tuple
 
 from tcod.console import Console
 from tcod.map import compute_fov
@@ -35,11 +35,14 @@ class Engine:
             player: The player actor.
         """
         self.message_log = MessageLog()
-        self.mouse_location = (0, 0)
+        self.mouse_location: Tuple[int, int] = (0, 0)
         self.player = player
+        self.ai_enabled = True
 
     def handle_enemy_turns(self) -> None:
         """Handle the turns of all enemies on the current game map."""
+        if not self.ai_enabled:
+            return
         # We iterate over a copy of the actors set, so we can modify it while iterating.
         for entity in set(self.game_map.actors) - {self.player}:
             if entity.ai:
